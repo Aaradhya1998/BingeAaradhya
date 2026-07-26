@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EntryStatus {
+  WATCHLIST
+  WATCHING
+  WATCHED
+  DROPPED
+}
+
+model Entry {
+  id            String      @id @default(cuid())
+  title         String
+  type          String
+  genres        String[]
+  status        EntryStatus
+  rating        Float?
+  notes         String?
+  synopsis      String?
+  cast          String[]
+  posterUrl     String?
+  backdropUrl   String?
+  tmdbId        Int?
+  tmdbType      String?
+  releaseYear   Int?
+  runtimeMin    Int?
+  progressText  String?
+  unitsConsumed Int         @default(1)
+  totalSeasons  Int?
+  totalEpisodes Int?
+  priority      Int?
+  isTop10       Boolean     @default(false)
+  isTop5Rec     Boolean     @default(false)
+  top10Rank     Int?
+  top5Rank      Int?
+  dateAdded     DateTime    @default(now())
+  dateStarted   DateTime?
+  dateWatched   DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([status])
+  @@index([type])
+  @@index([isTop10, top10Rank])
+  @@index([isTop5Rec, top5Rank])
+  @@index([dateWatched])
+}
+
+model TmdbCache {
+  id        String   @id @default(cuid())
+  query     String   @unique
+  response  Json
+  fetchedAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
