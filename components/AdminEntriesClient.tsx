@@ -20,17 +20,12 @@ type EntryForm = {
   rating: string;
   notes: string;
   synopsis: string;
-  cast: string;
   posterUrl: string;
   backdropUrl: string;
   tmdbId: string;
   tmdbType: string;
-  releaseYear: string;
-  runtimeMin: string;
   progressText: string;
   unitsConsumed: string;
-  totalSeasons: string;
-  totalEpisodes: string;
   priority: string;
   isTop10: boolean;
   isTop5Rec: boolean;
@@ -46,17 +41,12 @@ const emptyForm: EntryForm = {
   rating: "",
   notes: "",
   synopsis: "",
-  cast: "",
   posterUrl: "",
   backdropUrl: "",
   tmdbId: "",
   tmdbType: "",
-  releaseYear: "",
-  runtimeMin: "",
   progressText: "",
   unitsConsumed: "1",
-  totalSeasons: "",
-  totalEpisodes: "",
   priority: "",
   isTop10: false,
   isTop5Rec: false,
@@ -78,17 +68,12 @@ function toForm(entry?: EntryRecord): EntryForm {
     rating: entry.rating?.toString() ?? "",
     notes: entry.notes ?? "",
     synopsis: entry.synopsis ?? "",
-    cast: entry.cast.join(", "),
     posterUrl: entry.posterUrl ?? "",
     backdropUrl: entry.backdropUrl ?? "",
     tmdbId: entry.tmdbId?.toString() ?? "",
     tmdbType: entry.tmdbType ?? "",
-    releaseYear: entry.releaseYear?.toString() ?? "",
-    runtimeMin: entry.runtimeMin?.toString() ?? "",
     progressText: entry.progressText ?? "",
     unitsConsumed: String(entry.unitsConsumed ?? 1),
-    totalSeasons: entry.totalSeasons?.toString() ?? "",
-    totalEpisodes: entry.totalEpisodes?.toString() ?? "",
     priority: entry.priority?.toString() ?? "",
     isTop10: entry.isTop10,
     isTop5Rec: entry.isTop5Rec,
@@ -104,15 +89,10 @@ function fromTmdb(result: TmdbResult): EntryForm {
     type: result.mediaType === "movie" ? "Movie" : "TV",
     genres: result.genres.join(", "),
     synopsis: result.synopsis,
-    cast: result.cast.join(", "),
     posterUrl: result.posterUrl ?? "",
     backdropUrl: result.backdropUrl ?? "",
     tmdbId: String(result.id),
     tmdbType: result.mediaType,
-    releaseYear: result.releaseYear?.toString() ?? "",
-    runtimeMin: result.runtimeMin?.toString() ?? "",
-    totalSeasons: result.totalSeasons?.toString() ?? "",
-    totalEpisodes: result.totalEpisodes?.toString() ?? "",
   };
 }
 
@@ -123,18 +103,10 @@ function normalizePayload(form: EntryForm) {
       .split(",")
       .map((value) => value.trim())
       .filter(Boolean),
-    cast: form.cast
-      .split(",")
-      .map((value) => value.trim())
-      .filter(Boolean),
     rating: form.rating || null,
-    releaseYear: form.releaseYear || null,
-    runtimeMin: form.runtimeMin || null,
     tmdbId: form.tmdbId || null,
     progressText: form.progressText || null,
     unitsConsumed: form.unitsConsumed || "1",
-    totalSeasons: form.totalSeasons || null,
-    totalEpisodes: form.totalEpisodes || null,
     priority: form.priority || null,
     notes: form.notes || null,
     synopsis: form.synopsis || null,
@@ -260,12 +232,12 @@ export function AdminEntriesClient({ initialEntries }: { initialEntries: EntryRe
                   <button
                     key={result.id}
                     type="button"
-                    className="rounded-2xl border border-black/10 bg-secondary/40 p-3 text-left"
+                    className="rounded-2xl border border-white/10 bg-slate-800/80 p-3 text-left hover:bg-slate-800 transition-colors"
                     onClick={() => setForm(fromTmdb(result))}
                   >
-                    <div className="font-medium">{result.title}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {result.releaseYear ?? "Year unknown"} • {result.genres.join(", ")}
+                    <div className="font-medium text-white">{result.title}</div>
+                    <div className="text-sm text-slate-400">
+                      {result.releaseYear ? `${result.releaseYear} • ` : ""}{result.genres.join(", ")}
                     </div>
                   </button>
                 ))}
@@ -273,36 +245,54 @@ export function AdminEntriesClient({ initialEntries }: { initialEntries: EntryRe
             ) : null}
             <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
               <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Title" required />
-              <Input value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} placeholder="Type" required />
+              <Input value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} placeholder="Type e.g. Movie, TV" required />
               <Input value={form.genres} onChange={(e) => setForm({ ...form, genres: e.target.value })} placeholder="Genres, comma separated" />
               <select
                 value={form.status}
                 onChange={(e) => setForm({ ...form, status: e.target.value as EntryForm["status"] })}
-                className="h-11 rounded-2xl border border-black/10 bg-white px-4 text-sm"
+                className="h-11 rounded-2xl border border-black/10 bg-white px-4 text-sm text-slate-900 focus:outline-none focus:ring-4 focus:ring-primary/10"
               >
-                <option value="WATCHLIST">Watchlist</option>
-                <option value="WATCHING">Currently Watching</option>
-                <option value="WATCHED">Watched</option>
-                <option value="DROPPED">Dropped</option>
+                <option value="WATCHLIST" className="text-slate-900 bg-white">Watchlist</option>
+                <option value="WATCHING" className="text-slate-900 bg-white">Currently Watching</option>
+                <option value="WATCHED" className="text-slate-900 bg-white">Watched</option>
+                <option value="DROPPED" className="text-slate-900 bg-white">Dropped</option>
               </select>
               <Input value={form.rating} onChange={(e) => setForm({ ...form, rating: e.target.value })} placeholder="Rating /10" />
               <Input value={form.progressText} onChange={(e) => setForm({ ...form, progressText: e.target.value })} placeholder="Progress e.g. S2E4" />
-              <Input value={form.releaseYear} onChange={(e) => setForm({ ...form, releaseYear: e.target.value })} placeholder="Release year" />
-              <Input value={form.runtimeMin} onChange={(e) => setForm({ ...form, runtimeMin: e.target.value })} placeholder="Runtime per episode/movie (min)" />
               <Input value={form.unitsConsumed} onChange={(e) => setForm({ ...form, unitsConsumed: e.target.value })} placeholder="Episodes or view count" />
-              <Input value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })} placeholder="Watchlist priority" />
-              <Input type="date" value={form.dateStarted} onChange={(e) => setForm({ ...form, dateStarted: e.target.value })} />
-              <Input type="date" value={form.dateWatched} onChange={(e) => setForm({ ...form, dateWatched: e.target.value })} />
+              
+              {/* Watchlist Priority Dropdown */}
+              <select
+                value={form.priority}
+                onChange={(e) => setForm({ ...form, priority: e.target.value })}
+                className="h-11 rounded-2xl border border-black/10 bg-white px-4 text-sm text-slate-900 focus:outline-none focus:ring-4 focus:ring-primary/10"
+              >
+                <option value="" className="text-slate-900 bg-white">Watchlist Priority (Optional)</option>
+                <option value="1" className="text-slate-900 bg-white">Top</option>
+                <option value="2" className="text-slate-900 bg-white">Medium</option>
+                <option value="3" className="text-slate-900 bg-white">Bottom</option>
+              </select>
+
+              {/* Labeled Date Fields */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-slate-300">Date Started</label>
+                <Input type="date" value={form.dateStarted} onChange={(e) => setForm({ ...form, dateStarted: e.target.value })} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-slate-300">Date Completed / Watched</label>
+                <Input type="date" value={form.dateWatched} onChange={(e) => setForm({ ...form, dateWatched: e.target.value })} />
+              </div>
+
               <Input value={form.posterUrl} onChange={(e) => setForm({ ...form, posterUrl: e.target.value })} placeholder="Poster URL" className="md:col-span-2" />
-              <Input value={form.cast} onChange={(e) => setForm({ ...form, cast: e.target.value })} placeholder="Cast, comma separated" className="md:col-span-2" />
               <Textarea value={form.synopsis} onChange={(e) => setForm({ ...form, synopsis: e.target.value })} placeholder="Synopsis" className="md:col-span-2" />
               <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Short note or thoughts" className="md:col-span-2" />
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" checked={form.isTop10} onChange={(e) => setForm({ ...form, isTop10: e.target.checked })} />
+              
+              <label className="flex items-center gap-2 text-sm text-slate-200">
+                <input type="checkbox" checked={form.isTop10} onChange={(e) => setForm({ ...form, isTop10: e.target.checked })} className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-amber-500 focus:ring-amber-500" />
                 Include in Top 10
               </label>
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" checked={form.isTop5Rec} onChange={(e) => setForm({ ...form, isTop5Rec: e.target.checked })} />
+              <label className="flex items-center gap-2 text-sm text-slate-200">
+                <input type="checkbox" checked={form.isTop5Rec} onChange={(e) => setForm({ ...form, isTop5Rec: e.target.checked })} className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-amber-500 focus:ring-amber-500" />
                 Include in Top 5 Recommendations
               </label>
               <div className="flex flex-wrap gap-3 md:col-span-2">
@@ -361,19 +351,20 @@ export function AdminEntriesClient({ initialEntries }: { initialEntries: EntryRe
           </CardHeader>
           <CardContent className="space-y-3">
             {entries.map((entry) => (
-              <div key={entry.id} className="rounded-2xl border border-black/10 bg-white p-3">
+              <div key={entry.id} className="rounded-2xl border border-black/10 bg-white p-3.5 shadow-sm">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-medium">{entry.title}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="font-semibold text-slate-900">{entry.title}</p>
+                    <p className="text-sm font-medium text-slate-600">
                       {entry.status.toLowerCase()} • {entry.type}
+                      {entry.rating ? ` • ★ ${entry.rating.toFixed(1)}` : ""}
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <Button type="button" variant="outline" onClick={() => setForm(toForm(entry))}>
+                    <Button type="button" variant="outline" className="text-slate-900 border-slate-300 hover:bg-slate-100 hover:text-slate-900 font-medium" onClick={() => setForm(toForm(entry))}>
                       Edit
                     </Button>
-                    <Button type="button" variant="outline" onClick={() => handleDelete(entry.id)}>
+                    <Button type="button" variant="outline" className="text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700 font-medium" onClick={() => handleDelete(entry.id)}>
                       Delete
                     </Button>
                   </div>

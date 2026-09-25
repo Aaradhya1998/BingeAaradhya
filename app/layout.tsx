@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Link from "next/link";
+import { TopNavbar } from "@/components/TopNavbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BingeAaradhya",
-  description: "A personal watch tracker and showcase for films and series.",
+  title: "BingeAaradhya — Personal Watch Tracker & Showcase",
+  description: "A living shelf for everything Aaradhya is watching, ranking, and recommending.",
 };
 
 export default function RootLayout({
@@ -26,52 +26,22 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full bg-[radial-gradient(circle_at_top,_rgba(240,101,36,0.18),_transparent_35%),linear-gradient(180deg,_#f8efe6_0%,_#fff9f1_42%,_#f5efe8_100%)] text-foreground">
-        <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 pb-10 sm:px-6 lg:px-8">
-          <header className="sticky top-0 z-40 border-b border-black/5 bg-background/75 backdrop-blur">
-            <div className="flex items-center justify-between gap-4 py-4">
-              <div>
-                <Link href="/" className="text-xl font-semibold tracking-tight">
-                  BingeAaradhya
-                </Link>
-                <p className="text-sm text-muted-foreground">
-                  Watch tracker, rankings, and personal stats.
-                </p>
-              </div>
-              <nav className="flex flex-wrap items-center gap-2 text-sm">
-                <Link href="/" className="rounded-full px-3 py-2 hover:bg-black/5">
-                  Home
-                </Link>
-                <Link
-                  href="/library"
-                  className="rounded-full px-3 py-2 hover:bg-black/5"
-                >
-                  Library
-                </Link>
-                <Link
-                  href="/watchlist"
-                  className="rounded-full px-3 py-2 hover:bg-black/5"
-                >
-                  Watchlist
-                </Link>
-                <Link
-                  href="/stats"
-                  className="rounded-full px-3 py-2 hover:bg-black/5"
-                >
-                  Stats
-                </Link>
-                <Link
-                  href="/admin/entries"
-                  className="rounded-full border border-black/10 px-3 py-2 hover:bg-black/5"
-                >
-                  Admin
-                </Link>
-              </nav>
-            </div>
-          </header>
-          <main className="flex-1 py-8">{children}</main>
+      <body className="min-h-full font-sans text-slate-100 selection:bg-[#f5a623]/30 selection:text-white">
+        <div className="relative min-h-screen overflow-x-hidden">
+          {/* Subtle ambient lighting orbs in background */}
+          <div className="pointer-events-none fixed top-[-10%] left-[-5%] h-[500px] w-[500px] rounded-full bg-blue-500/10 blur-[130px]" />
+          <div className="pointer-events-none fixed top-[20%] right-[-10%] h-[600px] w-[600px] rounded-full bg-amber-500/[0.07] blur-[160px]" />
+          <div className="pointer-events-none fixed bottom-[-10%] left-[20%] h-[500px] w-[500px] rounded-full bg-cyan-500/[0.08] blur-[140px]" />
+
+          <div className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 pt-4 pb-12 sm:px-6 lg:px-8">
+            <TopNavbar />
+            <main className="flex-1">{children}</main>
+            <footer className="mt-16 border-t border-white/[0.08] py-8 text-center text-xs text-slate-400">
+              <p>BingeAaradhya • My private movie and tv show tracking list • Powered by TMDB </p>
+            </footer>
+          </div>
         </div>
       </body>
     </html>

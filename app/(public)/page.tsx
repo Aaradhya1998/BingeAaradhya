@@ -1,8 +1,11 @@
 export const dynamic = "force-dynamic";
 
+import Link from "next/link";
+import { Sparkles, Compass, Flame, Award } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { HeroDualBanners } from "@/components/HeroDualBanners";
+import { HomeTrendingSection } from "@/components/HomeTrendingSection";
 import { EntryCard } from "@/components/EntryCard";
-import { RankedList } from "@/components/RankedList";
 
 export default async function HomePage() {
   const [currentlyWatching, top10, top5] = await Promise.all([
@@ -23,77 +26,62 @@ export default async function HomePage() {
     }),
   ]);
 
+  // Extract unique genres across entries for dynamic category pill filtering
+  const allGenres = Array.from(
+    new Set([...currentlyWatching, ...top10, ...top5].flatMap((e) => e.genres))
+  ).filter(Boolean);
+
   return (
-    <div className="space-y-10">
-      <section className="surface overflow-hidden p-6 sm:p-8">
-        <div className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
-          <div className="space-y-4">
-            <p className="text-sm uppercase tracking-[0.3em] text-primary">Personal showcase</p>
-            <h1 className="max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl">
-              A living shelf for everything Aaradhya is watching, ranking, and recommending.
-            </h1>
-            <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
-              Current obsessions, all-time favorites, hand-picked recommendations, and a full archive that stays editable behind a simple admin gate.
-            </p>
-          </div>
-          <div className="rounded-[28px] bg-[linear-gradient(135deg,_rgba(240,101,36,0.18),_rgba(255,255,255,0.86))] p-6">
-            <p className="text-sm text-muted-foreground">This week&apos;s snapshot</p>
-            <div className="mt-4 grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-3xl font-semibold">{currentlyWatching.length}</p>
-                <p className="text-sm text-muted-foreground">Currently watching</p>
-              </div>
-              <div>
-                <p className="text-3xl font-semibold">{top10.length}</p>
-                <p className="text-sm text-muted-foreground">Top 10 slots filled</p>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="space-y-12">
+      {/* 2. Hero Section: Dual-Banner Featured Cards (Flix-id Style) */}
+      <section>
+        <HeroDualBanners currentlyWatching={currentlyWatching} />
       </section>
 
-      <section className="space-y-4">
-        <div className="flex items-end justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold">Currently Watching</h2>
-            <p className="text-sm text-muted-foreground">What&apos;s in progress right now.</p>
+      {/* 3, 4, 5. Category Pills + Section Header + 6-Column Card Grid */}
+      <HomeTrendingSection
+        initialEntries={top10.length > 0 ? top10 : currentlyWatching}
+        allGenres={allGenres}
+      />
+
+      {/* Additional Showcase: Aaradhya's Top 5 Curated Recommendations */}
+      {top5.length > 0 && (
+        <section className="space-y-5 pt-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.08] pt-8">
+            <div>
+              <div className="flex items-center gap-2">
+                <Award className="h-5 w-5 text-[#f5a623]" />
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                  Aaradhya&apos;s Recommendations
+                </h2>
+                <span className="flex h-5 items-center justify-center rounded-full bg-[#f5a623]/20 px-2 text-xs font-semibold text-[#f5a623]">
+                  Top 5
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+                Hand-picked titles I would unequivocally tell a friend to watch
+              </p>
+            </div>
+
+            <Link
+              href="/library"
+              className="text-xs font-medium text-[#f5a623] hover:text-[#ffb733] transition-colors"
+            >
+              Explore all in library &rarr;
+            </Link>
           </div>
-        </div>
-        {currentlyWatching.length ? (
-          <div className="grid gap-4 md:grid-cols-2">
-            {currentlyWatching.map((entry) => (
-              <EntryCard key={entry.id} entry={entry} />
+
+          <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
+            {top5.map((entry, index) => (
+              <EntryCard
+                key={`rec-${entry.id}`}
+                entry={entry}
+                rank={index + 1}
+              />
             ))}
           </div>
-        ) : (
-          <div className="surface p-8 text-sm text-muted-foreground">
-            Nothing is marked as currently watching yet.
-          </div>
-        )}
-      </section>
-
-      <section className="grid gap-6 xl:grid-cols-2">
-        <div className="space-y-4">
-          <h2 className="text-2xl font-semibold">My Top 10</h2>
-          {top10.length ? (
-            <RankedList listKey="top10" entries={top10} />
-          ) : (
-            <div className="surface p-8 text-sm text-muted-foreground">
-              The all-time list is still being curated.
-            </div>
-          )}
-        </div>
-        <div className="space-y-4">
-          <h2 className="text-2xl font-semibold">Top 5 Recommendations</h2>
-          {top5.length ? (
-            <RankedList listKey="top5" entries={top5} />
-          ) : (
-            <div className="surface p-8 text-sm text-muted-foreground">
-              Recommendations will appear here once they&apos;re pinned.
-            </div>
-          )}
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 }
